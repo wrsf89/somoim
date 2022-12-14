@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.somoim.mapper.memberMapper">
+      
+    <update id="findPasswordUpdate" parameterType="map">
+     UPDATE MEMBER SET M_PASSWORD=#{pw} WHERE M_EMAIL=#{m_email}
+    </update>
+      
+      	<resultMap id="member" type="com.somoim.DTO.MemberDTO">
+		<result column="M_EMAIL" property="m_email" />
+		<result column="M_PASSWORD" property="m_password" />
+		<result column="M_NICKNAME" property="m_nickname" />
+		<result column="M_NAME" property="m_name" />
+		<result column="M_BIRTH" property="m_birth" />
+		<result column="M_PHONE" property="m_phone" />
+		<result column="M_FILENAME" property="m_filename" />
+	</resultMap>
+  </mapper>
+  
+  
+  
+  
+  
+  
+  

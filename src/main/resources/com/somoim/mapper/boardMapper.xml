@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.somoim.mapper.boardMapper">
+
+	<select id="nextBcode" resultType="int">
+		SELECT NVL(MAX(B_CODE),0) FROM
+		BOARD
+	</select>
+
+	<insert id="boardWrite" parameterType="com.somoim.DTO.BoardDTO">
+		INSERT INTO BOARD(B_CODE,B_MNICKNAME,B_TITLE,B_CONTENT,B_FILENAME,B_DATE,B_HIT,B_PEOPLE,B_SCCODE,B_ADDR,B_MEMAIL,B_MCCODE,B_REGION,B_APEOPLE) VALUES(#{b_code},#{b_mnickname},#{b_title},#{b_content},#{b_filename},#{b_date},0,1,#{b_sccode},#{b_addr},#{b_memail},#{b_mccode},#{b_region},0)
+	</insert>
+
+	<select id="boardList" resultMap="board" parameterType="com.somoim.DTO.PageDTO">
+		SELECT *
+		FROM (SELECT ROWNUM RN, BOARD.* FROM BOARD)
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY B_CODE DESC
+	</select>
+	
+	<select id="getmoimCount" resultType="int">
+		SELECT COUNT(*) FROM BOARD
+	</select>
+	
+	
+
+	<update id="boardUphit" parameterType="int">
+		UPDATE BOARD SET
+		B_HIT=B_HIT+1 WHERE B_CODE=#{b_code}
+	</update>
+
+	<select id="boardView" parameterType="int" resultMap="board">
+		SELECT *
+		FROM BOARD WHERE B_CODE=#{b_code}
+	</select>
+
+	<update id="btitleUpdate"
+		parameterType="com.somoim.DTO.BoardDTO">
+		UPDATE BOARD SET B_TITLE = #{b_title} WHERE B_CODE =
+		#{b_code}
+	</update>
+
+	<update id="bcontentUpdate"
+		parameterType="com.somoim.DTO.BoardDTO">
+		UPDATE BOARD SET B_CONTENT = #{b_content} WHERE B_CODE =
+		#{b_code}
+	</update>
+
+	<delete id="boardDelete" parameterType="int">
+		DELETE FROM BOARD WHERE
+		B_CODE = #{b_code}
+	</delete>
+
+	<select id="getfileName" parameterType="int" resultType="String">
+		SELECT
+		B_FILENAME FROM BOARD WHERE B_CODE = #{b_code}
+	</select>
+
+	<select id="upHitList" resultMap="board">
+		SELECT * FROM BOARD ORDER BY
+		B_HIT DESC
+	</select>
+
+	<select id="boardListCategory" resultMap="board">
+		SELECT * FROM BOARD
+		WHERE B_MCCODE=#{b_mccode} AND B_SCCODE=#{b_sccode}
+		ORDER BY B_CODE
+	</select>
+
+	<update id="boardListUpdate" parameterType="String">
+		UPDATE BOARD SET
+		B_MNICKNAME=#{m_nickname} WHERE B_MEMAIL=#{m_email}
+	</update>
+
+   <select id="getBoardAddrList" resultMap="board" parameterType="int">
+    SELECT * FROM BOARD WHERE B_SCCODE = #{b_sccode}
+   </select>
+   
+   <select id="finalList" resultMap="board" >
+      SELECT * FROM BOARD WHERE B_SCCODE =#{b_sccode} AND B_REGION=#{b_region}
+   </select>
+   
+   <select id="upPeopleList" resultMap="board">
+     SELECT * FROM BOARD ORDER BY B_PEOPLE DESC
+   </select>
+   
+   <delete id="memberdelete" parameterType="String">
+    DELETE FROM BOARD WHERE B_MEMAIL=#{m_email}
+   </delete>
+   
+   <update id="insertapeole" parameterType="com.somoim.DTO.ApplyDTO">
+     UPDATE BOARD SET B_APEOPLE = 1 WHERE B_CODE=#{a_bcode}
+   </update>
+    
+    <update id="updatePeople" parameterType="com.somoim.DTO.ApplyDTO">
+      UPDATE BOARD SET B_PEOPLE = B_PEOPLE + 1 WHERE B_CODE = #{a_bcode}
+    </update>
+    
+    <update id="updateApeople" parameterType="com.somoim.DTO.ApplyDTO">
+      UPDATE BOARD SET B_APEOPLE = B_APEOPLE -1 WHERE B_CODE = #{a_bcode}
+    </update>
+    
+
+    
+	<resultMap type="com.somoim.DTO.BoardDTO" id="board">
+		<result property="b_code" column="B_CODE" />
+		<result property="b_mccode" column="B_MCCODE" />
+		<result property="b_sccode" column="B_SCCODE" />
+		<result property="b_memail" column="B_MEMAIL" />
+		<result property="b_mnickname" column="B_MNICKNAME" />
+		<result property="b_title" column="B_TITLE" />
+		<result property="b_content" column="B_CONTENT" />
+		<result property="b_addr" column="B_ADDR" />
+		<result property="b_filename" column="B_FILENAME" />
+		<result property="b_date" column="B_DATE" />
+		<result property="b_hit" column="B_HIT" />
+		<result property="b_people" column="B_PEOPLE" />
+		<result property="b_region" column="B_REGION" />
+		<result property="b_apeople" column="B_APEOPLE" />
+	</resultMap>
+
+	<select id="getMaincategoryList" resultMap="maincate">
+		SELECT * FROM MAINCATEGORY ORDER BY MC_CODE
+	</select>
+     
+	<resultMap id="maincate" type="com.somoim.DTO.MaincategoryDTO">
+		<result column="MC_CODE" property="mc_code" />
+		<result column="MC_NAME" property="mc_name" />
+	</resultMap>
+	
+	<select id="getSubCategoryList" resultMap="subcate" parameterType="int">
+	   SELECT * FROM SUBCATEGORY WHERE SC_MCCODE = #{sc_mccode}
+	</select>
+	
+	<resultMap id="subcate" type="com.somoim.DTO.SubcategoryDTO">
+		<result column="SC_CODE" property="sc_code" />
+		<result column="SC_MCCODE" property="sc_mccode" />
+		<result column="SC_NAME" property="sc_name" />
+	</resultMap>
+	
+</mapper>

@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.somoim.mapper.MasterMapper">
+
+	<!--멤버검색 -->
+	<select id="masmemSearch" parameterType="com.somoim.DTO.PageDTO" resultMap="member">
+		SELECT * 
+		FROM (SELECT ROWNUM RN, MEMBER.* FROM MEMBER WHERE 
+		M_EMAIL LIKE '%'||#{keyword}||'%' OR 
+		M_NICKNAME LIKE '%'||#{keyword}||'%' OR
+		M_NAME LIKE '%'||#{keyword}||'%')
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY M_EMAIL
+	</select>
+	<select id="getMemSearchCount" parameterType="String" resultType="int">
+		SELECT COUNT(*) FROM MEMBER WHERE 
+		M_EMAIL LIKE '%'||#{keyword}||'%' OR 
+		M_NICKNAME LIKE '%'||#{keyword}||'%' OR
+		M_NAME LIKE '%'||#{keyword}||'%'
+	</select>
+	
+	<insert id="addMaster" parameterType="com.somoim.DTO.MemberDTO">
+		INSERT INTO MEMBER(M_EMAIL,M_PASSWORD,M_NICKNAME) VALUES(#{m_email},#{m_password}, #{m_nickname})
+	</insert>
+
+	<update id="masMemModi">
+		UPDATE MEMBER 
+			<set>
+				<if test="searchType == 'M_FILENAME'">
+					M_FILENAME=null 
+				</if>
+				<if test="searchType == 'M_NICKNAME'">
+					M_NICKNAME=null 
+				</if>
+				<if test="searchType == 'M_PHONE'">
+					M_PHONE=null 
+				</if>
+			</set>
+		WHERE M_EMAIL=#{m_email}
+	</update>
+	
+	
+	
+	<resultMap type="com.somoim.DTO.MemberDTO" id="member">
+		<result property="m_email" column="M_EMAIL"/>
+		<result property="m_password" column="M_PASSWORD"/>
+		<result property="m_nickname" column="M_NICKNAME"/>
+		<result property="m_name" column="M_NAME"/>
+		<result property="m_birth" column="M_BIRTH"/>
+		<result property="m_phone" column="M_PHONE"/>
+		<result property="m_filename" column="M_FILENAME"/>
+	</resultMap>
+	
+	<!--게시판 검색  -->	
+	<select id="moimList" resultMap="board"	parameterType="com.somoim.DTO.PageDTO">
+		SELECT *
+		FROM (SELECT ROWNUM RN, BOARD.* FROM BOARD)
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY B_CODE DESC
+	</select>
+	<select id="getmoimCount" resultType="int">
+		SELECT COUNT(*) FROM BOARD
+	</select>
+	
+	<!-- 게시물검색  -->
+	<select id="moimSearch" resultMap="board"
+		parameterType="com.somoim.DTO.PageDTO">
+		SELECT *
+		FROM (SELECT ROWNUM RN, BOARD.* FROM BOARD WHERE
+		B_MNICKNAME LIKE '%'||#{keyword}||'%' OR 
+		B_TITLE LIKE '%'||#{keyword}||'%' OR
+		B_CONTENT LIKE '%'||#{keyword}||'%'
+		)
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY B_CODE DESC
+	</select>
+	<select id="getSearchMoimCount" resultType="int" parameterType="String">
+		SELECT COUNT(*) FROM BOARD  WHERE
+		B_MNICKNAME LIKE '%'||#{keyword}||'%' OR 
+		B_TITLE LIKE '%'||#{keyword}||'%' OR
+		B_CONTENT LIKE '%'||#{keyword}||'%'
+	</select>
+ 	
+	<select id="moimmemList" resultMap="board" parameterType="com.somoim.DTO.PageDTO">
+		SELECT *
+		FROM (SELECT ROWNUM RN, BOARD.* FROM BOARD WHERE B_MEMAIL=#{keyword})
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY B_CODE DESC
+	</select>
+	
+	<select id="getSearchMoimmemCount" resultType="int" parameterType="String">
+		SELECT COUNT(*) FROM BOARD  WHERE
+		B_MEMAIL = #{b_memail}
+	</select>
+	
+	
+	<select id="boardView" parameterType="int" resultType="com.somoim.DTO.BoardDTO">
+		SELECT * FROM BOARD WHERE B_CODE=#{b_code}
+	</select>
+	
+	
+	  <resultMap type="com.somoim.DTO.BoardDTO" id="board">
+		<result property="b_code" column="B_CODE" />
+		<result property="b_mccode" column="B_MCCODE"/>
+		<result property="b_sccode" column="B_SCCODE"/>
+		<result property="b_memail" column="B_MEMAIL"/>
+		<result property="b_mnickname" column="B_MNICKNAME" />
+		<result property="b_title" column="B_TITLE" />
+		<result property="b_content" column="B_CONTENT" />		
+		<result property="b_filename" column="B_FILENAME" />
+		<result property="b_date" column="B_DATE" />
+		<result property="b_hit" column="B_HIT" />
+		<result property="b_people" column="B_PEOPLE" />
+	</resultMap>
+	
+	
+	 
+ 	<select id="cateList" parameterType="com.somoim.DTO.PageDTO" resultMap="maincate">
+		SELECT * FROM 
+		(SELECT ROWNUM RN, MAINCATEGORY.* FROM MAINCATEGORY ORDER BY MC_CODE)
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY MC_CODE
+		
+	</select>
+
+	<select id="maincateList" resultMap="maincate">
+		SELECT * FROM MAINCATEGORY ORDER BY MC_CODE
+	</select>
+	<select id="getcate1Count" resultType="int">
+		SELECT COUNT(*) FROM MAINCATEGORY
+	</select>
+	
+ 	
+
+	
+	<select id="findccode" resultType="int">
+		SELECT NVL(MAX(MC_CODE),0) FROM MAINCATEGORY
+	</select>
+	<insert id="cate1Add" parameterType="com.somoim.DTO.MaincategoryDTO" >
+		INSERT INTO MAINCATEGORY VALUES(#{mc_code},#{mc_name})
+	</insert>
+	
+	<delete id="delcate1" parameterType="int">
+		DELETE FROM MAINCATEGORY WHERE MC_CODE=#{mc_code}
+	</delete>	
+	
+	<select id="getmcName" parameterType="int" resultType="String">
+		SELECT MC_NAME FROM MAINCATEGORY WHERE MC_CODE=#{mc_code}		
+	</select>
+
+	
+	
+	
+	
+	<resultMap type="com.somoim.DTO.MaincategoryDTO" id="maincate">
+		<result property="mc_code" column="MC_CODE"/>
+		<result property="mc_name" column="MC_NAME"/>
+	</resultMap>
+	
+	
+	
+	<select id="cate2List" parameterType="com.somoim.DTO.PageDTO" resultMap="subcate">
+		SELECT * FROM 
+		(SELECT ROWNUM RN, SUBCATEGORY.* FROM SUBCATEGORY)
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY SC_MCCODE		
+	</select>
+	
+	<select id="getcate2Count" resultType="int">
+		SELECT COUNT(*) FROM SUBCATEGORY
+	</select>
+	
+	
+	<select id="findsccode" resultType="int">
+		SELECT NVL(MAX(SC_CODE),0) FROM SUBCATEGORY
+	</select>	
+	
+	<delete id="delcate2" parameterType="int">
+		DELETE FROM SUBCATEGORY WHERE SC_CODE=#{sc_code}
+	</delete>
+	
+	<insert id="cate2Add" parameterType="com.somoim.DTO.SubcategoryDTO">
+		INSERT INTO SUBCATEGORY(SC_CODE,SC_MCCODE,SC_NAME) VALUES(#{sc_code},#{sc_mccode},#{sc_name})
+	</insert>
+		
+	<resultMap type="com.somoim.DTO.SubcategoryDTO" id="subcate">
+		<result property="sc_code" column="SC_CODE"/>
+		<result property="sc_mccode" column="SC_MCCODE"/>
+		<result property="sc_name" column="SC_NAME"/>
+	</resultMap>
+	
+	<select id="getmsgSearchCount" parameterType="String" resultType="int">
+		SELECT COUNT(*) FROM MESSAGE WHERE 
+		MSG_SENDID LIKE '%'||#{keyword}||'%' OR 
+		MSG_MEMAIL LIKE '%'||#{keyword}||'%' OR
+		MSG_RECEIVEID LIKE '%'||#{keyword}||'%' OR
+		MSG_CONTENT LIKE '%'||#{keyword}||'%'
+	</select>
+	
+	<delete id="msgdelete" parameterType="int">
+		DELETE FROM MESSAGE WHERE MSG_CODE=#{msg_code}
+	</delete>
+	
+	<select id="masmsgSearch" parameterType="com.somoim.DTO.PageDTO" resultMap="message">
+		SELECT * 
+		FROM(SELECT ROWNUM RN, MESSAGE.* FROM MESSAGE WHERE 
+		MSG_SENDID LIKE '%'||#{keyword}||'%' OR 
+		MSG_MEMAIL LIKE '%'||#{keyword}||'%' OR
+		MSG_RECEIVEID LIKE '%'||#{keyword}||'%' OR
+		MSG_CONTENT LIKE '%'||#{keyword}||'%'
+		) 
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY MSG_CODE DESC
+	</select>
+	
+	<insert id="SendMasMsg" parameterType="com.somoim.DTO.MessageDTO">
+		INSERT INTO MESSAGE(MSG_CODE,MSG_SENDID,MSG_MEMAIL,MSG_RECEIVEID,MSG_CONTENT,MSG_DATE,MSG_CHECK) 
+		VALUES(#{msg_code},#{msg_sendid},'master',#{msg_receiveid},#{msg_content},SYSDATE,0)
+	</insert>
+	
+	<select id="getmsgcode" resultType="int">
+		SELECT NVL(MAX(MSG_CODE),0) FROM MESSAGE
+	</select>
+	
+	<select id="msgmemList" resultMap="message" parameterType="com.somoim.DTO.PageDTO">
+		SELECT *
+		FROM (SELECT ROWNUM RN, MESSAGE.* FROM MESSAGE WHERE MSG_MEMAIL=#{keyword})
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY MSG_CODE DESC
+	</select>
+	
+	<select id="getMsgmemCount" parameterType="String" resultType="int">
+		SELECT COUNT(*) FROM MESSAGE WHERE MSG_MEMAIL=#{keyword}
+	</select>
+	
+	<select id="masterCallMsg" resultType="int">
+	 SELECT COUNT(*) FROM MESSAGE WHERE MSG_RECEIVEID='master' AND MSG_CHECK=0
+	</select>
+	
+	<select id="mascallMsgList" resultMap="message" parameterType="com.somoim.DTO.PageDTO">
+		SELECT * FROM (SELECT ROWNUM RN, MESSAGE.* FROM MESSAGE 
+			<where>
+				<if test="keyword != null">
+					MSG_MEMAIL=#{keyword} AND MSG_RECEIVEID='master' AND MSG_CHECK=0)
+				</if>
+				<if test="keyword == null">
+					MSG_RECEIVEID='master' AND MSG_CHECK=0) 
+				</if>
+				
+			</where>
+			
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY MSG_CODE DESC
+	</select>
+	
+	<update id="MsgCheck" parameterType="int">
+		UPDATE MESSAGE SET MSG_CHECK=1 WHERE MSG_CODE=#{msg_code}
+	</update>
+
+
+	<resultMap type="com.somoim.DTO.MessageDTO" id="message">
+		<result property="msg_code" column="MSG_CODE"/>
+		<result property="msg_sendid" column="MSG_SENDID"/>
+		<result property="msg_memail" column="MSG_MEMAIL"/>
+		<result property="msg_receiveid" column="MSG_RECEIVEID"/>
+		<result property="msg_content" column="MSG_CONTENT"/>
+		<result property="msg_date" column="MSG_DATE"/>
+		<result property="msg_check" column="MSG_CHECK"/>
+		<result property="msg_dispotal" column="MSG_DISPOTAL"/>		
+	</resultMap>
+	
+	<select id="masapplyList" parameterType="com.somoim.DTO.PageDTO" resultMap="apply">
+		SELECT * 
+		FROM(SELECT ROWNUM RN, APPLY.* FROM APPLY) 
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY A_CODE DESC		
+	</select>
+	
+	<select id="applyView" parameterType="int" resultType="com.somoim.DTO.ApplyDTO">
+		SELECT * FROM APPLY WHERE A_CODE=#{a_code}
+	</select>
+	
+	<delete id="applyDelete" parameterType="int">
+		DELETE FROM APPLY WHERE A_CODE=#{a_code}
+	</delete>
+	
+	<select id="getapplyCount" resultType="int">
+		SELECT COUNT(*) FROM APPLY
+	</select>
+	
+	<select id="getapplySearchCount" parameterType="String"	resultType="int">
+		SELECT COUNT(*) FROM APPLY  WHERE 
+		A_MNICKNAME LIKE '%'||#{keyword}||'%' OR 
+		A_CONTENT LIKE '%'||#{keyword}||'%'
+	</select>
+	
+	<select id="masapplySearch" parameterType="com.somoim.DTO.PageDTO" resultMap="apply">
+		SELECT * 
+		FROM(SELECT ROWNUM RN, APPLY.* FROM APPLY WHERE 
+		A_MNICKNAME LIKE '%'||#{keyword}||'%' OR 
+		A_CONTENT LIKE '%'||#{keyword}||'%') 
+		WHERE RN BETWEEN #{startrow} AND #{endrow}
+		ORDER BY A_CODE DESC
+	</select>
+	
+	 
+	 <resultMap type="com.somoim.DTO.ApplyDTO" id="apply">
+		<result property="a_code" column="A_CODE"/>
+		<result property="a_bcode" column="A_BCODE"/>
+		<result property="a_mnickname" column="A_MNICKNAME"/>
+		<result property="a_memail" column="A_MEMAIL"/>
+		<result property="a_content" column="A_CONTENT"/>
+		<result property="a_date" column="A_DATE"/>
+		<result property="a_check" column="A_CHECK"/>
+	</resultMap>
+			
+
+  	<!-- 
+	<resultMap type="" id="">
+		<result property="" column=""/>
+	</resultMap>
+	 -->
+	
+	
+</mapper>
